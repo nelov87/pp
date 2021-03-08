@@ -1,0 +1,51 @@
+﻿@page "/AboutAs"
+@inject IPageService pageService
+@layout INStudio.Pages.InnerSiteLayout
+@using System.Web
+
+<div class="back_re">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="title">
+                    <h2>@AboutPage.Title</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- about -->
+<div class="about">
+    <div class="container-fluid">
+        <div class="row d_flex">
+            <div class="col-md-7">
+                <div class="titlepage">
+                    <h2>ЗА НАС</h2>
+                    <span>@((MarkupString)AboutPage.Content)</span>
+
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="about_img">
+                    <figure><img src="@AboutPage.Image.Url" alt="#" /></figure>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end about -->
+
+@code {
+
+
+    public INStudio.Data.Page AboutPage { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        this.AboutPage = pageService.GetPageByName("За Нас");
+
+    }
+
+}

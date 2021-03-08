@@ -1,0 +1,25 @@
+@* @if (IsVisible)
+{
+    <div class="alert alert-success" role="alert">
+        @ChildContent
+        <div class="col-1" style="text-align:right">
+            <a style="text-underline-position:below; cursor:pointer" @onclick="(() => CloseValidation())">x</a>
+        </div>
+    </div>
+}
+
+
+@code {
+
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private void CloseValidation()
+    {
+        IsVisible = false;
+    }
+
+} *@

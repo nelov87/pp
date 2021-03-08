@@ -1,0 +1,414 @@
+@page "/Administration/Galery/All"
+@inject ApplicationDbContext db
+@using System.Linq
+@using Microsoft.EntityFrameworkCore
+@inject IImageService imageService
+@using INStudio.Data
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject IToastService toastService
+@using System.Globalization
+@* @typeparam TValue
+    @inherits InputBase<TValue> *@
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Снимки в галерии</h3>
+
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control float-right"
+                                    placeholder="Search">
+
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+
+                                    <th>Title</th>
+                                    <th>Image</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in @giList)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @item.Gallery.Name
+                                        </td>
+
+
+
+                                        <td>
+                                            <img src="@item.Image.Url" alt="Girl in a jacket" width="100" height="auto">
+                                        </td>
+
+                                        <td>
+                                            <a @onclick='() => DeleteGI(item.GalleryId, item.ImageId)'
+                                                class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+
+    <section class="content">
+        <div class="row">
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Снимки в галерии</h3>
+
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control float-right"
+                                    placeholder="Search">
+
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+
+                                    <th>Title</th>
+                                    
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in @galeryList)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @item.Name
+                                        </td>
+
+
+                                        <td>
+                                            <a @onclick='() => DeleteItem(item.Id)'
+                                                class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+
+    <section class="content">
+        <div class="row">
+
+            <div class="col-md-10">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Опции</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <div class="card-body">
+                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalForm())">Добави
+                            Галерия</button>
+                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави
+                            Медиа</button>
+                    </div>
+
+
+                    <div class="card-footer">
+                        @* <button form="@pageId" type="submit" class="btn btn-success">Запиши</button> *@
+                    </div>
+
+
+                </div>
+                <!-- /.card -->
+
+
+
+
+            </div>
+            <!-- /div col-6 /.col (left) -->
+
+
+            <div class="col-md-2">
+                <!-- general form elements disabled -->
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">General Elements</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+
+
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+
+        </div>
+    </section>
+    <!-- /.content -->
+
+    
+
+    @if (showModalForm)
+    {
+        <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <EditForm id="@pageId" Model="@galeryModel" OnSubmit="@HandleValidSubmit">
+                            <ChildContent Context="another_name">
+                                <DataAnnotationsValidator />
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="galeryModel.Title">Title</label>
+                                        <InputText class="form-control" @bind-Value="galeryModel.Name" />
+                                    </div>
+                                    
+                                    <div class="form-group">
+
+                                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави Медии</button>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Save</button>
+
+                                </div>
+                                <!-- /.card-body -->
+                            </ChildContent>
+                        </EditForm>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModalForm()">Затвори</button>
+                            <button form="@pageId" type="submit" class="btn btn-success">Запиши</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+    @if (showModal)
+    {
+        <div class="modal" tabindex="-2" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Избери медиа.&hellip;</p>
+
+                        <div id="scrollable-content">
+                            <ul class="ulcustompopup">
+                                @foreach (var image in @mediaList)
+                                {
+                                    <li class="licustompopup">
+                                        <input class="inputcustompopup" type="checkbox" id="cb\@image.Title"
+                                            @onchange="eventArgs => { CheckboxClicked(image, eventArgs.Value); }" />
+                                        <label class="labelcustompopup" for="cb\@image.Title"><img src="@image.Url" /></label>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModal()">Затвори</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+
+</div>
+
+
+
+@code
+{
+    string pageId = "abv";
+    bool showModal = false;
+    bool showModalForm = false;
+    string Message = "Не са избрани файлове.";
+    private HashSet<Image> mediaList = new HashSet<Image>();
+    //private HashSet<Gallery> galeryList = new HashSet<Gallery>();
+    private HashSet<GalleryImage> giList = new HashSet<GalleryImage>();
+    private HashSet<Gallery> galeryList = new HashSet<Gallery>();
+
+    private HashSet<GalleryImage> giToAdd = new HashSet<GalleryImage>();
+
+    IReadOnlyList<IBrowserFile> selectedFiles;
+
+    //[Parameter]
+    //public TValue SelectedValue { get; set; }
+
+    private Gallery galeryModel = new Gallery();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        galeryList = this.db.Galleries.ToHashSet();
+        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
+        mediaList = this.imageService.GetImages().ToHashSet();
+
+        StateHasChanged();
+    }
+
+    void CheckboxClicked(Image image, object checkedValue)
+    {
+        if ((bool)checkedValue)
+        {
+
+            giToAdd.Add(new GalleryImage() { GalleryId = galeryModel.Id, ImageId = image.Id });
+        }
+        else
+        {
+
+        }
+    }
+
+    async void HandleValidSubmit(EditContext editContext)
+    {
+        this.galeryModel.GalleryImages = giToAdd;
+        this.db.Galleries.Add(galeryModel);
+        this.db.SaveChanges();
+
+        giToAdd = new HashSet<GalleryImage>();
+        galeryModel = new Gallery();
+        StateHasChanged();
+    }
+
+
+
+    void DeleteItem(string id)
+    {
+        HashSet<GalleryImage> giToDelete = this.db.GalleryImages.Where(gi => gi.GalleryId == id).ToHashSet();
+        this.db.GalleryImages.RemoveRange(giToDelete);
+        this.db.SaveChanges();
+        Gallery galeryToDelete = this.db.Galleries.FirstOrDefault(g => g.Id == id);
+        this.db.Galleries.Remove(galeryToDelete);
+        this.db.SaveChanges();
+
+        galeryList = this.db.Galleries.ToHashSet();
+        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
+        StateHasChanged();
+    }
+
+    void DeleteGI(string galeryId, string ImageId)
+    {
+        GalleryImage giToDelete = this.db.GalleryImages.FirstOrDefault(gi => gi.GalleryId == galeryId || gi.ImageId == ImageId);
+        this.db.GalleryImages.Remove(giToDelete);
+        this.db.SaveChanges();
+
+
+
+
+        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
+        StateHasChanged();
+    }
+
+
+    void OpenModal()
+    {
+        showModal = true;
+        StateHasChanged();
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        StateHasChanged();
+    }
+
+    void OpenModalForm()
+    {
+        showModalForm = true;
+        StateHasChanged();
+    }
+
+    void CloseModalForm()
+    {
+        showModalForm = false;
+        StateHasChanged();
+    }
+
+    //string GetMedia(string id)
+    //{
+    // string path = this.mediaList.FirstOrDefault(x => x.Id == id).Url;
+    //
+    // return path;
+    //}
+    //void GetAllMedias()
+    //{
+    // this.mediaList = db.Images.ToHashSet();
+    //}
+}

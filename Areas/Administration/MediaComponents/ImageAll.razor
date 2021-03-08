@@ -1,0 +1,295 @@
+@page "/Administration/Media/All"
+@inject ApplicationDbContext db
+
+@inject IImageService imageService
+@using INStudio.Data
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject IToastService toastService
+@using System.Globalization
+@* @typeparam TValue
+    @inherits InputBase<TValue> *@
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Медиа</h3>
+
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 150px;">
+                                <input type="text" name="table_search" class="form-control float-right"
+                                    placeholder="Search">
+
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+
+                                    <th>Title</th>
+                                    <th>Image</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in @mediaList)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @item.Title
+                                        </td>
+
+
+
+                                        <td>
+                                            <img src="@item.Url" alt="Girl in a jacket" width="100" height="auto">
+                                        </td>
+
+                                        <td>
+                                            <a @onclick='() => DeleteItem(item.Id)' class="btn btn-outline-danger"><i
+                                                    class="far fa-trash-alt"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+
+            </div>
+
+        </div>
+    </section>
+
+
+
+
+
+    <section class="content">
+        <div class="row">
+
+            <div class="col-md-10">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Опции</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <div class="card-body">
+                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави
+                            Медиа</button>
+                    </div>
+
+
+                    <div class="card-footer">
+                        @* <button form="@pageId" type="submit" class="btn btn-success">Запиши</button> *@
+                    </div>
+
+
+                </div>
+                <!-- /.card -->
+
+
+
+
+            </div>
+            <!-- /div col-6 /.col (left) -->
+
+
+            <div class="col-md-2">
+                <!-- general form elements disabled -->
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">General Elements</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+
+
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+
+        </div>
+    </section>
+    <!-- /.content -->
+
+    @if (showModal)
+    {
+        <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Избери медиа.&hellip;</p>
+
+                        <form @onsubmit="OnSubmit">
+                            <InputFile class="btn btn-block btn-secondary" OnChange="OnInputFileChange" multiple
+                                maxAllowedSize="1000000" />
+                            <br /><br />
+                            <button class="btn btn-primary" type="submit">Качи на сървъра</button>
+                        </form>
+
+                        <h3>@Message</h3>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModal()">Затвори</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+
+</div>
+
+
+
+@code
+{
+    string pageId = "abv";
+    bool showModal = false;
+    string Message = "Не са избрани файлове.";
+    private HashSet<Image> mediaList = new HashSet<Image>();
+    IReadOnlyList<IBrowserFile> selectedFiles;
+
+    //[Parameter]
+    //public TValue SelectedValue { get; set; }
+
+    private Image mediaModel = new Image();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        mediaList = this.imageService.GetImages().ToHashSet();
+
+        StateHasChanged();
+    }
+
+    async void HandleValidSubmit(EditContext editContext)
+    {
+        imageService.AddImage(mediaModel);
+
+        mediaModel = new Image();
+        StateHasChanged();
+    }
+
+
+
+    void DeleteItem(string id)
+    {
+        bool operationOk = imageService.DeleteImage(id);
+
+        if (operationOk)
+        {
+            toastService.ShowToast(ToastLevel.Success, "Deleted Sucsesfuly!");
+        }
+        else
+        {
+            toastService.ShowToast(ToastLevel.Error, "Not deleted!");
+        }
+
+        mediaList = this.imageService.GetImages().ToHashSet();
+        StateHasChanged();
+    }
+
+
+    void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+        Message = $"{selectedFiles.Count} избран файл.";
+        this.StateHasChanged();
+    }
+
+    async void OnSubmit()
+    {
+        foreach (var file in selectedFiles)
+        {
+            string giud = Guid.NewGuid().ToString();
+            Stream stream = file.OpenReadStream(10000000);
+            var filePath = "/Uploads/" + giud + file.Name;
+            var cwrf = env.WebRootPath;
+            var path = Path.Combine(cwrf, "Uploads", giud + file.Name);
+            FileStream fs = File.Create(path);
+
+            await stream.CopyToAsync(fs);
+            stream.Close();
+            fs.Close();
+            Image img = new Image();
+            img.Title = file.Name;
+            img.Url = filePath;
+            bool operationOk = imageService.AddImage(img);
+
+            if (operationOk)
+            {
+                toastService.ShowToast(ToastLevel.Success, "Медиата е качена успешно!");
+            }
+            else
+            {
+                toastService.ShowToast(ToastLevel.Error, "Възникна проблем при качването на медиата!");
+            }
+
+        }
+        Message = $"{selectedFiles.Count} файлове качени на сървъра.";
+        GetAllMedias();
+        this.StateHasChanged();
+    }
+
+    
+    
+
+
+    void OpenModal()
+    {
+        showModal = true;
+        StateHasChanged();
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        StateHasChanged();
+    }
+
+    string GetMedia(string id)
+    {
+        string path = this.mediaList.FirstOrDefault(x => x.Id == id).Url;
+
+        return path;
+    }
+    void GetAllMedias()
+    {
+        this.mediaList = db.Images.ToHashSet();
+    }
+}

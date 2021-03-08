@@ -1,0 +1,22 @@
+﻿@page "/page/{id}"
+@inject IPageService pageService
+@using INStudio.Data
+@layout SiteLayout
+
+<h1>@pg.Title</h1>
+
+
+@code {
+
+    [Parameter]
+    public string id { get; set; }
+
+    private Page pg;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        this.pg = pageService.GetPageById(id);
+    }
+}

@@ -1,0 +1,421 @@
+@page "/Administration/Project/AddProject"
+@page "/Administration/Project/Edit/{id}"
+@inject ApplicationDbContext db
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@using Microsoft.EntityFrameworkCore
+@inject IProjectService projectService
+@inject IImageService imageService
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject IToastService toastService
+
+
+<div class="content-wrapper">
+
+
+    <section class="content">
+        <div class="row">
+
+            <div class="col-md-10">
+                <!-- general form elements -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Добави Проект</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <EditForm id="@pageId" Model="@projectModel" OnSubmit="@HandleValidSubmit">
+                        <ChildContent Context="another_name">
+                            <DataAnnotationsValidator />
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="projectModel.Title">Заглавие</label>
+                                    <InputText class="form-control" @bind-Value="projectModel.Title" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="projectModel.Description">Текст</label>
+                                    <InputText class="form-control" @bind-Value="projectModel.Description" />
+                                </div>
+                                
+                                
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalPrimaryImage())">Добави Основна снимка</button>
+
+                                    <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalForm())">Добави Галерия</button>
+                                </div>
+                                <button type="submit" class="btn btn-success">Запази</button>
+                                
+                            </div>
+                            <!-- /.card-body -->
+                        </ChildContent>
+                    </EditForm>
+                    <div class="card-footer">
+                        @* <button form="@pageId" type="submit" class="btn btn-success">Запиши</button> *@
+                    </div>
+
+
+                </div>
+                <!-- /.card -->
+
+
+
+
+            </div>
+            <!-- /div col-6 /.col (left) -->
+
+
+            <div class="col-md-2">
+                <!-- general form elements disabled -->
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">General Elements</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+
+
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+
+        </div>
+    </section>
+    <!-- /.content -->
+
+
+    @if (showModalForm)
+    {
+        <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <EditForm id="@pageId" Model="@galeryModel" OnSubmit="@AddGaleryToProject">
+                            <ChildContent Context="another_name">
+                                <DataAnnotationsValidator />
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="galeryModel.Title">Title</label>
+                                        <InputText class="form-control" @bind-Value="galeryModel.Name" />
+                                    </div>
+                                    
+                                    <div class="form-group">
+
+                                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави Медии</button>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Save</button>
+
+                                </div>
+                                <!-- /.card-body -->
+                            </ChildContent>
+                        </EditForm>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModalForm()">Затвори</button>
+                            <button form="@pageId" type="submit" class="btn btn-success">Запиши</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+    @if (showModal)
+    {
+        <div class="modal" tabindex="-2" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Избери медиа.&hellip;</p>
+
+                        <div id="scrollable-content">
+                            <ul class="ulcustompopup">
+                                @foreach (var image in @mediaList)
+                                {
+                                    <li class="licustompopup">
+                                        <input class="inputcustompopup" type="checkbox" id="cb\@image.Title"
+                                            @onchange="eventArgs => { CheckboxClicked(image, eventArgs.Value); }" />
+                                        <label class="labelcustompopup" for="cb\@image.Title"><img src="@image.Url" /></label>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModal()">Затвори</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+    @if (showModalPrimariImage)
+    {
+        <div class="modal" tabindex="-2" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Избери медиа.&hellip;</p>
+
+                        <div id="scrollable-content">
+                            <ul class="ulcustompopup">
+                                @foreach (var image in @mediaList)
+                                {
+                                    <li class="licustompopup">
+                                        <input class="inputcustompopup" type="checkbox" id="cb\@image.Title"
+                                            @onchange="eventArgs => { CheckboxClickedPrimaryImage(image, eventArgs.Value); }" />
+                                        <label class="labelcustompopup" for="cb\@image.Title"><img src="@image.Url" /></label>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <form @onsubmit="OnSubmit">
+                                    <InputFile class="btn btn-secondary" OnChange="OnInputFileChange" multiple
+                                        maxAllowedSize="1000000" />
+                                    <br /><br />
+                                    <button class="btn btn-primary" type="submit">Качи на сървъра</button>
+                                </form>
+
+                                <h3>@Message</h3>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModalPrimaryImage()">Затвори</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+@code
+{
+    [Parameter]
+    public string Id { get; set; }
+
+    Project projectModel;
+
+    string pageId = "abv";
+    bool showModal = false;
+    bool showModalForm = false;
+    bool showModalPrimariImage = false;
+    string Message = "Не са избрани файлове.";
+    private HashSet<Image> mediaList;
+    IReadOnlyList<IBrowserFile> selectedFiles;
+    private Gallery galeryModel = new Gallery();
+    private HashSet<GalleryImage> giToAdd = new HashSet<GalleryImage>();
+
+
+    void GetAllMedias()
+    {
+        this.mediaList = db.Images.ToHashSet();
+    }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        GetAllMedias();
+        if (Id != null)
+        {
+            this.projectModel = this.projectService.GetProject(Id);
+        }
+        else
+        {
+            projectModel = new Project();
+        }
+
+
+        StateHasChanged();
+    }
+
+    void HandleValidSubmit(EditContext editContext)
+    {
+        
+
+
+
+        bool operationOk = false;
+
+        if(Id != null)
+        {
+            operationOk = this.projectService.EditProject(Id, projectModel);
+        }
+        else
+        {
+            operationOk = this.projectService.AddProject(projectModel);
+            
+        }
+
+        if (operationOk)
+        {
+            toastService.ShowToast(ToastLevel.Success, "Записът е радактиран успешно!");
+        }
+        else
+        {
+            toastService.ShowToast(ToastLevel.Error, "Има грешка при ракцията!");
+        }
+
+        navigationManager.NavigateTo("/Administration/Project/All");
+        
+    }
+
+    void AddGaleryToProject(EditContext editContext)
+    {
+        projectModel.Gallery.GalleryImages = giToAdd;
+
+
+
+        
+    }
+
+    
+
+
+    void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+        Message = $"{selectedFiles.Count} избран файл.";
+        this.StateHasChanged();
+    }
+
+   async void OnSubmit()
+    {
+        foreach (var file in selectedFiles)
+        {
+            string giud = Guid.NewGuid().ToString();
+            Stream stream = file.OpenReadStream(10000000);
+            var filePath = "/Uploads/" + giud + file.Name;
+            var cwrf = env.WebRootPath;
+            var path = Path.Combine(cwrf, "Uploads", giud + file.Name);
+            FileStream fs = File.Create(path);
+
+            await stream.CopyToAsync(fs);
+            stream.Close();
+            fs.Close();
+            Image img = new Image();
+            img.Title = file.Name;
+            img.Url = filePath;
+            imageService.AddImage(img);
+            projectModel.Image = img;
+        }
+        Message = $"{selectedFiles.Count} файлове качени на сървъра.";
+        GetAllMedias();
+        this.StateHasChanged();
+    }
+
+    void CheckboxClicked(Image image, object checkedValue)
+    {
+         if ((bool)checkedValue)
+        {
+
+            giToAdd.Add(new GalleryImage() { GalleryId = galeryModel.Id, ImageId = image.Id });
+        }
+        else
+        {
+
+        }
+    }
+    void CheckboxClickedPrimaryImage(Image image, object checkedValue)
+    {
+         if ((bool)checkedValue)
+        {
+
+            projectModel.Image = image;
+        }
+        else
+        {
+
+        }
+    }
+
+    void OpenModal()
+    {
+        showModal = true;
+        StateHasChanged();
+    }
+
+    void CloseModal()
+    {
+        showModal = false;
+        StateHasChanged();
+    }
+
+    void OpenModalForm()
+    {
+        showModalForm = true;
+        StateHasChanged();
+    }
+
+    void CloseModalForm()
+    {
+        showModalForm = false;
+        StateHasChanged();
+    }
+    void OpenModalPrimaryImage()
+    {
+        showModalPrimariImage = true;
+        StateHasChanged();
+    }
+
+    void CloseModalPrimaryImage()
+    {
+        showModalPrimariImage = false;
+        StateHasChanged();
+    }
+
+    string GetMedia(string id)
+    {
+        string path = this.mediaList.FirstOrDefault(x => x.Id == id).Url;
+
+        return path;
+    }
+
+
+}

@@ -1,0 +1,41 @@
+﻿@inject IPageService pageService
+@inject NavigationManager navManager
+@using INStudio.Data
+
+
+<!-- about -->
+<div class="about">
+    <div class="container-fluid">
+        <div class="row d_flex">
+            <div class="col-md-7">
+                <div class="titlepage">
+                    <h2>ЗА НАС</h2>
+                    <span>@((MarkupString)pageModel.Content)</span>
+                    <a class="read_more" href="/AboutAs"> Виж повече</a>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="about_img">
+                    <figure><img src="@((MarkupString)pageModel.Image.Url)" alt="#" /></figure>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end about -->
+
+@code {
+    public Page pageModel;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        this.pageModel = this.pageService.GetPageByName("За Нас НАЧАЛНА СТРАНИЦА");
+    }
+
+    protected void GoToPage()
+    {
+        navManager.NavigateTo("/AboutAs");
+    }
+}

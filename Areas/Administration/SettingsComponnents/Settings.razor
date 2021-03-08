@@ -1,0 +1,198 @@
+@page "/Administration/Settings/All"
+@inject ApplicationDbContext db
+@using System.Linq
+@inject ISettingsService settingsService
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject IToastService toastService
+
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Настройки</h3>
+
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      
+                      <th>Име</th>
+                      <th>Стойност</th>
+                      <th>Опции</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach (var item in @SettingsList)
+                    {
+                        <tr>
+                            
+                            <td>
+                                @item.Name
+                            </td>
+                            <td>
+                                @item.Value
+                            </td>
+                            
+                            
+                            <td>
+                                <a @onclick='() => EditItem(item.Id)' class="btn btn-outline-info"><i class="fas fa-pencil-alt"></i></a>
+                                <AuthorizeView>
+                                    <Authorized>
+                                        @if (@context.User.IsInRole(ADMINISTRATION_ROLE))
+                                            {
+                                                <a @onclick='() => DeleteItem(item.Id)' class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
+                                            }
+                                    </Authorized>
+                                </AuthorizeView>
+                                
+                            </td>
+                        </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            
+          </div>
+        
+        </div>
+    </section>
+
+
+    
+
+
+    
+    <!-- /.content -->
+
+@if(showModal)
+{
+  <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Реадктиране на настройка</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Редактирай стойността.</p>
+              <EditForm id="@pageId" Model="SettingsModel" OnValidSubmit="@HandleValidSubmit">
+                  <DataAnnotationsValidator/>
+                  <div class="form-group">
+                    <label for="SettingsModel.Name">@SettingsModel.Name</label>
+                    
+                  </div>
+                  <div class="form-group">
+                    <label for="SettingsModel.Value">Стойност</label>
+                    <InputText class="form-control" @bind-Value="SettingsModel.Value"/>
+                  </div>
+                    
+              </EditForm>
+            </div>
+            <div class="modal-footer justify-content-between">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => CloseModal()">Затвори</button>
+              <button type="submit" form="@pageId" class="btn btn-primary">Запази</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
+      <!-- /.modal -->
+}
+
+
+</div>
+
+
+
+@code
+{
+    
+    string pageId = "abv";
+    HashSet<Setting> SettingsList = new HashSet<Setting>();
+    public Setting SettingsModel;
+    string ADMINISTRATION_ROLE = "Administrators";
+bool showModal = false;
+
+    protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            
+            SettingsModel = new Setting();
+            SettingsList = this.settingsService.GetAll().OrderBy(s => s.Name).ToHashSet();
+            
+
+            StateHasChanged();
+        }
+
+  void HandleValidSubmit(EditContext editContext)
+  {
+
+    bool operationOk = this.settingsService.Edit(SettingsModel.Key, SettingsModel.Value);
+
+    if(operationOk)
+    {
+      toastService.ShowToast(ToastLevel.Success, "Записът е радактиран  успешно!");
+    }
+    else
+    {
+      toastService.ShowToast(ToastLevel.Error, "Има грешка при ракцията!");
+    }
+      SettingsList = this.settingsService.GetAll().OrderBy(s => s.Name).ToHashSet();
+    StateHasChanged();
+    
+  }
+  
+
+
+  void DeleteItem(string id)
+  {
+    this.settingsService.Delete(id);
+    SettingsList = this.settingsService.GetAll().OrderBy(s => s.Name).ToHashSet();
+    StateHasChanged();
+  }
+
+void EditItem(string id)
+{
+    OpenModal();
+    SettingsModel = this.settingsService.GetById(id);
+    StateHasChanged();
+}
+  
+
+    void OpenModal()
+    {
+      showModal = true;
+      StateHasChanged();
+    }
+
+    void CloseModal()
+    {
+      showModal = false;
+      StateHasChanged();
+    }
+  
+  
+}    

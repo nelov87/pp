@@ -1,0 +1,23 @@
+@page "/Administration/Page/InitialiezPages"
+@inject ApplicationDbContext db
+
+
+<div class="form-row">
+    <div class="col-12">
+        <div class="float-lg-left" style="padding:40px">
+            <button @onclick="@Initialize" class="btn btn-info">Инициализирай</button>
+
+        </div>
+
+    </div>
+</div>
+
+@code {
+    protected void Initialize()
+    {
+        this.db.Pages.Add(new Page { Title = "За Нас"});
+
+        this.db.SaveChanges();
+    }
+
+}

@@ -1,0 +1,38 @@
+@page "/Administration/Settings/Initialiezesettings"
+@inject ApplicationDbContext db
+
+<div class="form-row">
+    <div class="col-12">
+        <div class="float-lg-left" style="padding:40px">
+            <button @onclick="@Initialize" class="btn btn-info">Инициализирай</button>
+
+        </div>
+        
+    </div>
+</div>
+
+
+@code {
+
+    protected void Initialize()
+    {
+        this.db.Settings.Add(new Setting { Name = "Телефон", Key = "Telephone", Value = "088" });
+        this.db.Settings.Add(new Setting { Name = "Адрес", Key = "Address", Value = "ul." });
+        this.db.Settings.Add(new Setting { Name = "Гугъл мапс локация", Key = "Location", Value = "google" });
+        this.db.Settings.Add(new Setting { Name = "Facebook", Key = "Facebook", Value = "Facebook" });
+        this.db.Settings.Add(new Setting { Name = "Twetter", Key = "Twetter", Value = "Twetter" });
+        this.db.Settings.Add(new Setting { Name = "Име (начална страница)", Key = "NameJumbotron", Value = "Пейком" });
+        this.db.Settings.Add(new Setting { Name = "Описание (начална страница)", Key = "DescriptionJumbotron", Value = "Строим пътища които свързват хора и икономики. Пътя към бъдещето." });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 1", Key = "SqareOne", Value = "Проектиране" });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 1(линк)", Key = "SqareOneLink", Value = "www.google.com" });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 2", Key = "SqareTwo", Value = "Строителство" });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 2(линк)", Key = "SqareTwoLink", Value = "www.google.com" });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 3", Key = "SqareTree", Value = "Поддръжка" });
+        this.db.Settings.Add(new Setting { Name = "Квадрат 3(линк)", Key = "SqareTreeLink", Value = "www.google.com" });
+        this.db.Settings.Add(new Setting { Name = "Email", Key = "Email", Value = "fsdds@sfdfs.com" });
+
+        this.db.SaveChanges();
+    }
+
+    
+}

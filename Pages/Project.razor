@@ -1,0 +1,154 @@
+﻿@page "/Project/{id}"
+@using INStudio.Data
+@inject IProjectService projectService
+@layout INStudio.Pages.InnerSiteLayout
+@inject INStudio.Services.IImageService imageService
+
+<style>
+    div.gallery {
+        margin: 5px;
+        border: 1px solid #ccc;
+        float: left;
+        width: 180px;
+    }
+
+        div.gallery:hover {
+            border: 1px solid #777;
+        }
+
+        div.gallery img {
+            width: 100%;
+            height: auto;
+        }
+
+    div.desc {
+        padding: 15px;
+        text-align: center;
+    }
+</style>
+
+<div class="back_re">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="title">
+                    <h2>@projectModel.Title</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- about -->
+<div class="about">
+    <div class="container-fluid">
+        <div class="row d_flex">
+            <div class="col-md-7">
+                <div class="titlepage">
+                    <h2>@projectModel.Title</h2>
+                    <span>@((MarkupString)projectModel.Description)</span>
+
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="about_img">
+                    <figure><img src="@projectModel.Image.Url" alt="#" /></figure>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="row d_flex">
+
+            @if (projectModel.Gallery.GalleryImages.Count > 0)
+            {
+
+                <div class="container">
+
+                    <h1 class="font-weight-light text-center text-lg-left mt-4 mb-0">Снимки</h1>
+
+                    <hr class="mt-2 mb-5">
+
+                    <div class="row text-center text-lg-left">
+
+                        
+
+                        @foreach (Image image in SavedImages)
+                        {
+                        <div class="col-lg-3 col-md-4 col-6">
+
+                            
+
+                            <a href="@image.Url" class="d-block mb-4 h-100">
+                                
+
+                                @if (image.Title.EndsWith(".MOV") || image.Title.EndsWith(".mov") || image.Title.EndsWith(".mp4") || image.Title.EndsWith(".avi"))
+                                {
+                                    <video width="100%" height="100%" controls>
+                                        <source src="@image.Url" type="video/mp4">
+
+                                        Your browser does not support the video tag.
+                                    </video>
+                                }
+                                else
+                                {
+                                    <img class="img-fluid img-thumbnail" src="@image.Url" alt="">
+                                }
+
+                            </a>
+                        </div>
+                        }
+                    </div>
+
+                </div>
+                <!-- /.container -->
+
+                
+
+
+
+
+
+            }
+        </div>
+    </div>
+</div>
+<!-- end about -->
+
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+
+    private INStudio.Data.Project projectModel;
+
+    private HashSet<Image> SavedImages;
+
+    private HashSet<Image> GetImages(HashSet<GalleryImage> galleryImages)
+    {
+        return this.imageService.GetImagesByGaleryImage(galleryImages);
+
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (!this.projectService.IsProjectExist(id))
+        {
+
+            this.navigationManager.NavigateTo("/Projects");
+        }
+        projectModel = this.projectService.GetProject(id);
+        if (projectModel.Gallery != null)
+        {
+            if (projectModel.Gallery.GalleryImages != null)
+            {
+                this.SavedImages = GetImages(projectModel.Gallery.GalleryImages.ToHashSet());
+            }
+        }
+
+
+    }
+}

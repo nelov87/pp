@@ -1,0 +1,94 @@
+﻿@inject IProjectService projectService
+@inject ApplicationDbContext db
+@using INStudio.Data
+
+<!-- projects -->
+<div class="projects">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="titlepage">
+                    <h2>Нашите проекти</h2>
+                    <span>Това са само част от нашите проекти</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="proj" class="carousel slide projects_ban" data-ride="carousel">
+                    <ol class="carousel-indicators">
+                        <li data-target="#proj" data-slide-to="0" class="active"></li>
+                        <li data-target="#proj" data-slide-to="1"></li>
+                        <li data-target="#proj" data-slide-to="2"></li>
+                    </ol>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="container-fluid">
+                                <div class="carousel-caption relative3">
+                                    <div class="row">
+
+                                        @foreach (Project project in ProjectList)
+                                        {
+                                            <div class="col-md-4">
+                                                <div class="project">
+                                                    <div class="project_img">
+                                                        <figure><img src="@project.Image.Url" alt="@project.Title" /></figure>
+                                                    </div>
+                                                    <div id="pro_ho" class="project_text">
+                                                        <h3>@project.Title</h3><br />@((MarkupString)project.Description.Substring(0, project.Description.Length > 100 ? 100 : project.Description.Length))
+                                                        <p><a href="/Project/@project.Id" class="btn btn-primary">Виж повече</a></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                        @*<div class="col-md-4">
+                                            <div class="project">
+                                                <div class="project_img">
+                                                    <figure><img src="images/project_img.png" alt="#" /></figure>
+                                                </div>
+                                                <div id="pro_ho" class="project_text">
+                                                    <h3>Път Мездра - Роман<br> цялостно ремонтиран</h3>
+                                                    <p></p>
+                                                </div>
+                                            </div>
+                                        </div>*@
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <a class="carousel-control-prev" href="#proj" role="button" data-slide="prev">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#proj" role="button" data-slide="next">
+                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end projects -->
+
+@code {
+    public HashSet<Project> ProjectList;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        this.ProjectList = this.projectService.GetProjects().Take(3).ToHashSet();
+    }
+
+    //protected void GoToProject(string id)
+    //{
+    //    navigationManager.NavigateTo($"/Project/{id}");
+    //}
+}
