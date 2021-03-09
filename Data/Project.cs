@@ -12,16 +12,16 @@ namespace INStudio.Data
         public string Title { get; set; }
 
         public string Description { get; set; }
-
+        public string GalleryId { get; set; }
         public Gallery Gallery { get; set; }
 
+        public string ImageId { get; set; }
         public Image Image { get; set; }
 
         public Project()
         {
             this.Id = Guid.NewGuid().ToString();
-            this.Gallery = new Gallery();
-            this.Image = new Image();
+            
         }
     }
 }

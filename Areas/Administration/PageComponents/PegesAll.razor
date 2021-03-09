@@ -127,7 +127,17 @@ void GetAllMedias()
 
   void DeleteItem(string id)
   {
-    
+    bool operationOk = this.pageService.DeletePage(id);
+
+    if (operationOk)
+        {
+            toastService.ShowToast(ToastLevel.Success, "Deleted Sucsesfuly!");
+        }
+        else
+        {
+            toastService.ShowToast(ToastLevel.Error, "Not deleted!");
+        }
+
     pageList = this.pageService.GetPages().ToHashSet();
     
     StateHasChanged();
@@ -142,5 +152,7 @@ void GetAllMedias()
         navigationManager.NavigateTo($"/Administration/Page/Edit/{id}");
         StateHasChanged();
     }
+
+    
   
 }    

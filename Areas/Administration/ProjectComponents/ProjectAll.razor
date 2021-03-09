@@ -51,7 +51,7 @@
                                 @item.Description
                             </td>
                             <td>
-                                <img src="@GetMedia(@item.Id)" alt="Girl in a jacket" width="100" height="auto">
+                                <img src="@GetMedia(@item.ImageId)" alt="Girl in a jacket" width="100" height="auto">
                             </td>
                             <td>
                                 <a @onclick='() => EditItem(item.Id)' class="btn btn-outline-info"><i class="fas fa-pencil-alt"></i></a>
@@ -131,15 +131,31 @@ void GetAllMedias()
   void DeleteItem(string id)
   {
     
-    projectList = this.projectService.GetProjects().ToHashSet();
+    bool operationOk = this.projectService.DeleteProject(id);
     
+    if (operationOk)
+        {
+            toastService.ShowToast(ToastLevel.Success, "Записът е изтрит успешно!");
+        }
+        else
+        {
+            toastService.ShowToast(ToastLevel.Error, "Има грешка при изтриването!");
+        }
+        projectList = this.projectService.GetProjects().ToHashSet();
+
     StateHasChanged();
   }
 
 
     string GetMedia(string id)
     {
-        string path = this.db.Projects.FirstOrDefault(x => x.Id == id).Image.Url;
+        string path ="";
+        //path = this.db.Projects.Include(x => x.Image).FirstOrDefault(x => x.Id == id).Image.Url;
+        if(id != null || id != String.Empty)
+        {
+          path = this.db.Images.FirstOrDefault(x => x.Id == id).Url;
+        }
+        
 
         return path;
     }  

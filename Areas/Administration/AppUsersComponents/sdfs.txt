@@ -1,4 +1,5 @@
-@page "/Administration/Users/Manager"
+@page "/Administration/Users/All"
+
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Identity;
 @inject UserManager<IdentityUser> _UserManager
@@ -251,7 +252,7 @@
     // await _RoleManager.CreateAsync(new IdentityRole(ADMINISTRATION_ROLE));
     // }
     // // Ensure a user named Admin@BlazorHelpWebsite.com is an Administrator
-    // var user = await _UserManager.FindByNameAsync("");
+    // var user = await _UserManager.FindByNameAsync("nelov87@gmail.com");
     // if (user != null)
     // {
     // // Is Admin@BlazorHelpWebsite.com in administrator role?

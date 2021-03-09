@@ -99,7 +99,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <EditForm id="@pageId" Model="@galeryModel" OnSubmit="@AddGaleryToProject">
+                        <EditForm id="@modalId" Model="@galeryModel" OnSubmit="@AddGaleryToProject">
                             <ChildContent Context="another_name">
                                 <DataAnnotationsValidator />
                                 <div class="card-body">
@@ -122,7 +122,7 @@
                     <div class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             @onclick="() => CloseModalForm()">Затвори</button>
-                            <button form="@pageId" type="submit" class="btn btn-success">Запиши</button>
+                            <button form="@modalId" type="submit" class="btn btn-success">Запиши</button>
 
                     </div>
                 </div>
@@ -161,6 +161,14 @@
                         </div>
                     </div>
                     <div class="modal-footer justify-content-between">
+                         <form @onsubmit="OnSubmit">
+                                    <InputFile class="btn btn-secondary" OnChange="OnInputFileChange" multiple
+                                        maxAllowedSize="1000000" />
+                                    <br /><br />
+                                    <button class="btn btn-primary" type="submit">Качи на сървъра</button>
+                                </form>
+
+                                <h3>@Message</h3>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             @onclick="() => CloseModal()">Затвори</button>
 
@@ -243,6 +251,7 @@
     Project projectModel;
 
     string pageId = "abv";
+    string modalId = "4451";
     bool showModal = false;
     bool showModalForm = false;
     bool showModalPrimariImage = false;
@@ -308,6 +317,8 @@
 
     void AddGaleryToProject(EditContext editContext)
     {
+        projectModel.Gallery = galeryModel;
+        projectModel.GalleryId = galeryModel.Id;
         projectModel.Gallery.GalleryImages = giToAdd;
 
 
@@ -367,7 +378,7 @@
          if ((bool)checkedValue)
         {
 
-            projectModel.Image = image;
+            projectModel.ImageId = image.Id;
         }
         else
         {

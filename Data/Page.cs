@@ -20,7 +20,7 @@ namespace INStudio.Data
         public Page()
         {
             this.Id = Guid.NewGuid().ToString();
-            this.Gallery = new Gallery();
+            
             
         }
     }
