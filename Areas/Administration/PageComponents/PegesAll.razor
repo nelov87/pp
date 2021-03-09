@@ -48,7 +48,7 @@
                                 @item.Title
                             </td>
                             <td>
-                                @item.Content
+                                @GetPartOfContent(@item.Content)
                             </td>
                             
                             <td>
@@ -153,6 +153,18 @@ void GetAllMedias()
         StateHasChanged();
     }
 
-    
+    string GetPartOfContent(string itemContent)
+    {
+      string partOfContent = "";
+      if(itemContent.Count() > 50)
+      {
+        partOfContent = itemContent.Substring(0, 49).ToString();
+      }
+      else
+      {
+        partOfContent = itemContent;
+      }
+      return partOfContent = partOfContent + "...";
+    }
   
 }    
