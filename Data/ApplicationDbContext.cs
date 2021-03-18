@@ -22,11 +22,17 @@ namespace INStudio.Data
 
         public DbSet<Page> Pages { get; set; }
 
+        public DbSet<Category> Category { get; set; }
+        public DbSet<CategoryProject> CategoryProjects { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<GalleryImage>().HasKey(gi => new { gi.GalleryId, gi.ImageId });
+            builder.Entity<CategoryProject>().HasKey(cp => new { cp.CategoryId, cp.ProjectId });
+
 
             //builder.Entity<GalleryImage>().HasOne(gi => gi.Gallery).WithMany(g => g.GalleryImages).HasForeignKey(gi => gi.GalleryId);
             //builder.Entity<GalleryImage>().HasOne(gi => gi.Image).WithMany(i => i.GalleryImages).HasForeignKey(gi => gi.ImageId);

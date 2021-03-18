@@ -15,8 +15,11 @@ namespace INStudio.Data
 
         public string Link { get; set; }
 
+        public string ImageId { get; set; }
+
         public Image Image { get; set; }
 
+        public string GeleryId { get; set; }
         public Gallery Galery { get; set; }
 
 

@@ -1,4 +1,4 @@
-﻿@page "/Projects"
+﻿@page "/Projects/{catId}"
 @using INStudio.Data
 @inject IProjectService projectService
 @layout INStudio.Pages.InnerSiteLayout
@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="title">
-                    <h2>Проекти</h2>
+                    <h2>@category.Title</h2>
                 </div>
             </div>
         </div>
@@ -34,23 +34,24 @@
                     </ol>
                     <div class="carousel-inner">
 
-                        @for (int i = 0; i + s < ProjectsList.Count / 3; i++)
+                        
+                            @for (int i = 0; i + s < ProjectsList.Count / 3; i++)
                         {
                             <div class="carousel-item @(i==0?"active":"")">
                                 <div class="container-fluid">
                                     <div class="carousel-caption relative3">
                                         <div class="row">
 
-                                            @foreach (INStudio.Data.Project project in ProjectsList.Skip(i * 3).Take(3).ToHashSet())
+                                            @foreach (var projectt in ProjectsList)
                                             {
                                                 <div class="col-md-4">
                                                     <div class="project">
                                                         <div class="project_img">
-                                                            <figure><img src="@project.Image.Url" alt="#" /></figure>
+                                                            <figure><img src="@projectt.Image.Url" alt="#" /></figure>
                                                         </div>
-                                                        <div id="pro_ho" class="project_text">
-                                                             <h3>@project.Title</h3><br />@*@((MarkupString)project.Description) *@
-                                                            <p><a href="/Project/@project.Id" class="btn btn-primary">Виж повече</a></p>
+                                                        <div id="pro_ho" class="project_text" style="background-color:#fffffff2;">
+                                                             <h3><a href="/Project/@projectt.Id">@projectt.Title</a></h3><br />@*@((MarkupString)project.Description) *@
+                                                            @* <p><a href="/Project/@projectt.Id" class="btn btn-primary">Виж повече</a></p> *@
                                                         </div>
                                                     </div>
                                                 </div>
@@ -63,6 +64,7 @@
                                 </div>
                             </div>
                         }
+                        
 
 
 
@@ -87,7 +89,15 @@
 
 
 
-@code {
+@code 
+{
+
+    [Parameter]
+    public string catId { get; set; }
+
+    private Category category;
+
+
     private HashSet<INStudio.Data.Project> ProjectsList;
     private int s = 0;
 
@@ -95,8 +105,17 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        this.ProjectsList = this.projectService.GetProjects();
+        ProjectsList = new HashSet<INStudio.Data.Project>();
+            category = this.db.Category.FirstOrDefault(c => c.Id == catId);
+        
+        HashSet<INStudio.Data.Project> proj = this.db.Projects.Include(p => p.CategoryProjects).Include(i => i.Image).ToHashSet();
+            foreach(var pr in proj)
+            {
+                if(pr.CategoryProjects.Any(c => c.CategoryId == catId))
+                {
+                    ProjectsList.Add(pr);
+                }
+            }
 
         if (ProjectsList.Count % 3 > 0)
         {

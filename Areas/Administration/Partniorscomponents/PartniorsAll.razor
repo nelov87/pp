@@ -1,0 +1,170 @@
+@page "/Administration/Partniors/All"
+@inject IPartniorsService partniorService
+@inject ApplicationDbContext db
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+@using Microsoft.EntityFrameworkCore
+@using Blazored.Toast
+@using Blazored.Toast.Services
+@inject IToastService toastService
+
+
+<div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">About Skils</h3>
+
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Description</th>
+                      <th>Image</th>
+                      <th>Action</th>
+                      
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @foreach (var item in @partniorList)
+                    {
+                        <tr>
+                            
+                            <td>
+                                @item.Title
+                            </td>
+                            <td>
+                                @item.Description
+                            </td>
+                            <td>
+                                <img src="@GetMedia(@item.ImageId)" alt="Girl in a jacket" width="100" height="auto">
+                            </td>
+                            <td>
+                                <a @onclick='() => EditItem(item.Id)' class="btn btn-outline-info"><i class="fas fa-pencil-alt"></i></a>
+                                <AuthorizeView>
+                                    <Authorized>
+                                        @if (@context.User.IsInRole(ADMINISTRATION_ROLE))
+                                            {
+                                                <a @onclick='() => DeleteItem(item.Id)' class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
+                                            }
+                                    </Authorized>
+                                </AuthorizeView>
+                                
+                            </td>
+                        </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+            
+          </div>
+        
+        </div>
+    </section>
+
+
+    
+
+
+    
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+@code
+{
+string pageId = "abv";
+bool showModal = false;
+private HashSet<Partnior> partniorList;
+  private Partnior partniorModel;
+  string ADMINISTRATION_ROLE = "Administrators";
+   private HashSet<Image> mediaList = new HashSet<Image>();
+
+void GetAllMedias()
+{
+  @* this.mediaList = db.INMedias.ToHashSet(); *@
+}
+    protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            
+            
+            partniorList = this.partniorService.GetPartniors().ToHashSet();
+            partniorModel = new Partnior();
+            StateHasChanged();
+        }
+
+  
+  
+  
+
+  void DeleteItem(string id)
+  {
+    
+    bool operationOk = this.partniorService.DeletePartnior(id);
+    
+    if (operationOk)
+        {
+            toastService.ShowToast(ToastLevel.Success, "Записът е изтрит успешно!");
+        }
+        else
+        {
+            toastService.ShowToast(ToastLevel.Error, "Има грешка при изтриването!");
+        }
+        partniorList = this.partniorService.GetPartniors().ToHashSet();
+
+    StateHasChanged();
+  }
+
+
+    string GetMedia(string id)
+    {
+        string path ="";
+        //path = this.db.Projects.Include(x => x.Image).FirstOrDefault(x => x.Id == id).Image.Url;
+        if(id != null || id != String.Empty)
+        {
+          path = this.db.Images.FirstOrDefault(x => x.Id == id).Url;
+        }
+        
+
+        return path;
+    }  
+   
+
+    void EditItem(string id)
+    {
+        navigationManager.NavigateTo($"/Administration/Partniors/Edit/{id}");
+        StateHasChanged();
+    }
+  
+}    

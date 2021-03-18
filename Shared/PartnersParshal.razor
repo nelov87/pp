@@ -1,4 +1,7 @@
-﻿<!-- choose -->
+﻿
+
+
+<!-- choose -->
 <div class="brands" style="background-image:url(img/textured-background.jpg);">
     <div class="row">
         <div class="col-md-12">
@@ -8,11 +11,21 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-2" style="vertical-align: middle; display: inline-block;">
+    <div class="row" style="display: flex; justify-content: center;">
+        @* <div class="col-md-2" style="vertical-align: middle; display: inline-block;">
 
+        </div> *@
+        @foreach (var item in partniorList)
+        {
+            <div class="col-md-2" style="text-align: center; margin: 1em 0;">
+            <span style="height: 100%; vertical-align: middle;"></span>
+            <a href="@item.Link">
+                <img src="@item.Image.Url" style="height:100px; vertical-align:middle; " />
+
+            </a>
         </div>
-        <div class="col-md-2" style="text-align: center; margin: 1em 0;">
+        }
+        @* <div class="col-md-2" style="text-align: center; margin: 1em 0;">
             <span style="display: inline-block; height: 100%; vertical-align: middle;"></span>
             <a href="#">
                 <img src="/img/bagltd1.jpg" style="height:100px; vertical-align:middle; " />
@@ -39,10 +52,10 @@
                 <img src="/img/trace.png" style="width: 70%; vertical-align: middle; " />
 
             </a>
-        </div>
-        <div class="col-md-2" style="vertical-align: middle; display: inline-block;">
+        </div> *@
+        @* <div class="col-md-2" style="vertical-align: middle; display: inline-block;">
 
-        </div>
+        </div> *@
 
     </div>
 
@@ -58,4 +71,13 @@
 </div>
 <!-- end choose -->
 
-@code { }
+@code 
+{ 
+    private HashSet<Partnior> partniorList;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        partniorList = this.partniorService.GetPartniors().ToHashSet();
+    }
+}

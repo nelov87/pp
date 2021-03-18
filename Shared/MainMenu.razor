@@ -1,7 +1,4 @@
-﻿
-
-
-<!-- header -->
+﻿<!-- header -->
 
 
 
@@ -48,7 +45,9 @@
                         </div>
                         <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
                             <nav class="navigation navbar navbar-expand-md navbar-dark ">
-                                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+                                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                                    data-target="#navbarsExample04" aria-controls="navbarsExample04"
+                                    aria-expanded="false" aria-label="Toggle navigation">
                                     <span class="navbar-toggler-icon"></span>
                                 </button>
                                 <div class="collapse navbar-collapse" id="navbarsExample04">
@@ -59,11 +58,19 @@
                                             </NavLink>
                                             @*<a class="nav-link" href="index.html">Начало</a>*@
                                         </li>
-                                        <li class="nav-item">
-                                             
-                                            <NavLink class="nav-link" href="/Projects">
+                                        <li class="nav-item dropdown">
+
+                                            <a class="nav-link dropdown-toggle" href="/#" role="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                 Проекти
-                                            </NavLink>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                                @foreach (var cat in categoriesList)
+                                                {
+                                                    <a class="dropdown-item" href="/Projects/@cat.Id">@cat.Title</a>
+                                                }
+                                                
+                                            </div>
                                         </li>
                                         <li class="nav-item">
                                             <NavLink class="nav-link" href="/Contacts">
@@ -95,6 +102,7 @@
     public string Telefon { get; set; }
     public string Email { get; set; }
     public string Facebook { get; set; }
+    private HashSet<Category> categoriesList;
 
 
 
@@ -105,5 +113,6 @@
         this.Telefon = settingsService.GetByKey("Telephone");
         this.Email = settingsService.GetByKey("Email");
         this.Facebook = settingsService.GetByKey("Facebook");
+        this.categoriesList = this.db.Category.ToHashSet();
     }
 }

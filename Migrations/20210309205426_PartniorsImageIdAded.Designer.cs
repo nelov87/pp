@@ -3,49 +3,23 @@ using System;
 using INStudio.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace INStudio.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210309205426_PartniorsImageIdAded")]
+    partial class PartniorsImageIdAded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityByDefaultColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.2");
-
-            modelBuilder.Entity("INStudio.Data.Category", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Category");
-                });
-
-            modelBuilder.Entity("INStudio.Data.CategoryProject", b =>
-                {
-                    b.Property<string>("CategoryId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ProjectId")
-                        .HasColumnType("text");
-
-                    b.HasKey("CategoryId", "ProjectId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("CategoryProjects");
-                });
 
             modelBuilder.Entity("INStudio.Data.Gallery", b =>
                 {
@@ -392,25 +366,6 @@ namespace INStudio.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("INStudio.Data.CategoryProject", b =>
-                {
-                    b.HasOne("INStudio.Data.Category", "Category")
-                        .WithMany("CategoryProject")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("INStudio.Data.Project", "Project")
-                        .WithMany("CategoryProjects")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("INStudio.Data.GalleryImage", b =>
                 {
                     b.HasOne("INStudio.Data.Gallery", "Gallery")
@@ -526,11 +481,6 @@ namespace INStudio.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("INStudio.Data.Category", b =>
-                {
-                    b.Navigation("CategoryProject");
-                });
-
             modelBuilder.Entity("INStudio.Data.Gallery", b =>
                 {
                     b.Navigation("GalleryImages");
@@ -539,11 +489,6 @@ namespace INStudio.Migrations
             modelBuilder.Entity("INStudio.Data.Image", b =>
                 {
                     b.Navigation("GalleryImages");
-                });
-
-            modelBuilder.Entity("INStudio.Data.Project", b =>
-                {
-                    b.Navigation("CategoryProjects");
                 });
 #pragma warning restore 612, 618
         }

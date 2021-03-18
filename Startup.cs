@@ -50,6 +50,8 @@ namespace INStudio
             services.AddTransient<ISettingsService, SettingsService>();
             services.AddTransient<IImageService, ImageService>();
             services.AddScoped<IInitialiezeService, InitialiezeService>();
+            services.AddScoped<IPartniorsService, PartniorsService>();
+
             //services.AddTransient<IFileUpload, FileUpload>();
             services.AddSignalR(e => {
                 e.MaximumReceiveMessageSize = 102400000;

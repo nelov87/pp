@@ -17,10 +17,12 @@ namespace INStudio.Data
 
         public string ImageId { get; set; }
         public Image Image { get; set; }
+        public ICollection<CategoryProject> CategoryProjects { get; set; }
 
         public Project()
         {
             this.Id = Guid.NewGuid().ToString();
+            this.CategoryProjects = new HashSet<CategoryProject>();
             
         }
     }

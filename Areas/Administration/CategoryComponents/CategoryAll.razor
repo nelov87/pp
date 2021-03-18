@@ -1,10 +1,10 @@
-@page "/Administration/Galery/All"
+@page "/Administration/Category/All"
 @inject ApplicationDbContext db
 @using System.Linq
 @using Microsoft.EntityFrameworkCore
-@inject IImageService imageService
+
 @using INStudio.Data
-@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
+
 @using Blazored.Toast
 @using Blazored.Toast.Services
 @inject IToastService toastService
@@ -19,7 +19,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Снимки в галерии</h3>
+                        <h3 class="card-title">Категории</h3>
 
                         <div class="card-tools">
                             <div class="input-group input-group-sm" style="width: 150px;">
@@ -39,30 +39,25 @@
                                 <tr>
                                    <th>id</th>
                                     <th>Title</th>
-                                    <th>Image</th>
                                     <th>Action</th>
+                                    
 
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in @giList)
+                                @foreach (var item in @cList)
                                 {
                                     <tr>
                                         <td>
-                                            @item.Gallery.Id
+                                            @item.Id
                                         </td>
                                         <td>
-                                            @item.Gallery.Name
+                                            @item.Title
                                         </td>
 
 
-
                                         <td>
-                                            <img src="@item.Image.Url" alt="Girl in a jacket" width="100" height="auto">
-                                        </td>
-
-                                        <td>
-                                            <a @onclick='() => DeleteGI(item.GalleryId, item.ImageId)'
+                                            <a @onclick='() => DeleteItem(item.Id)'
                                                 class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
                                         </td>
                                     </tr>
@@ -108,24 +103,28 @@
                             <thead>
                                 <tr>
 
-                                    <th>Title</th>
+                                    <th>CategoryId</th>
+                                    <th>ProjectId</th>
                                     
                                     <th>Action</th>
 
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in @galeryList)
+                                @foreach (var item in @cpList)
                                 {
                                     <tr>
 
                                         <td>
-                                            @item.Name
+                                            @item.CategoryId
+                                        </td>
+                                        <td>
+                                            @item.ProjectId
                                         </td>
 
 
                                         <td>
-                                            <a @onclick='() => DeleteItem(item.Id)'
+                                            <a @onclick='() => DeleteCP(item.CategoryId, item.ProjectId)'
                                                 class="btn btn-outline-danger"><i class="far fa-trash-alt"></i></a>
                                         </td>
                                     </tr>
@@ -158,12 +157,10 @@
                     <!-- /.card-header -->
                     <!-- form start -->
                     <div class="card-body">
-                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalForm())">Добави
-                            Галерия</button>
-                            <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalFormAddMedia())">Добави
-                            Медиа Галерия </button>
-                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави
-                            Медиа</button>
+                        
+                            <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalFormAddMedia())">Добави CP </button>
+                            <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalForm())">Добави C </button>
+                        
                     </div>
 
 
@@ -206,31 +203,28 @@
 
     
 
-    @if (showModalForm)
+   @if (showModalForm)
     {
         <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Добави галерия</h4>
+                        <h4 class="modal-title">Добави Медиа галерия</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <EditForm id="@pageId" Model="@galeryModel" OnSubmit="@HandleValidSubmit">
+                        <EditForm id="@pageId" Model="@cModel" OnSubmit="@HandleValidSubmit">
                             <ChildContent Context="another_name">
                                 <DataAnnotationsValidator />
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="galeryModel.Title">Title</label>
-                                        <InputText class="form-control" @bind-Value="galeryModel.Name" />
+                                        <label for="giToAdd.Title">Id</label>
+                                        <InputText class="form-control" @bind-Value="cModel.Title" />
                                     </div>
                                     
-                                    <div class="form-group">
-
-                                        <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави Медии</button>
-                                    </div>
+                                    
                                     <button type="submit" class="btn btn-success">Save</button>
 
                                 </div>
@@ -252,6 +246,7 @@
         <!-- /.modal -->
     }
 
+
     @if (showModalFormAddMedia)
     {
         <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
@@ -264,17 +259,17 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <EditForm id="@pageId" Model="@gi" OnSubmit="@HandleValidSubmitAddMedia">
+                        <EditForm id="@pageId" Model="@cp" OnSubmit="@HandleValidSubmitCP">
                             <ChildContent Context="another_name">
                                 <DataAnnotationsValidator />
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="giToAdd.Title">Id</label>
-                                        <InputText class="form-control" @bind-Value="gi.GalleryId" />
+                                        <label for="cp.CategoryId">Idc</label>
+                                        <InputText class="form-control" @bind-Value="cp.CategoryId" />
                                     </div>
                                     <div class="form-group">
-                                        <label for="giToAdd.Title">Id</label>
-                                        <InputText class="form-control" @bind-Value="gi.ImageId" />
+                                        <label for="cp.ProjectId">Idp</label>
+                                        <InputText class="form-control" @bind-Value="cp.ProjectId" />
                                     </div>
                                     
                                     <button type="submit" class="btn btn-success">Save</button>
@@ -299,45 +294,7 @@
     }
 
 
-    @if (showModal)
-    {
-        <div class="modal" tabindex="-2" ig="modal-ld" style="display:block" role="dialog">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Добави медиа</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Избери медиа.&hellip;</p>
-
-                        <div id="scrollable-content">
-                            <ul class="ulcustompopup">
-                                @foreach (var image in @mediaList)
-                                {
-                                    <li class="licustompopup">
-                                        <input class="inputcustompopup" type="checkbox" id="cb\@image.Title"
-                                            @onchange="eventArgs => { CheckboxClicked(image, eventArgs.Value); }" />
-                                        <label class="labelcustompopup" for="cb\@image.Title"><img src="@image.Url" /></label>
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="modal-footer justify-content-between">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            @onclick="() => CloseModal()">Затвори</button>
-
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
-        <!-- /.modal -->
-    }
+    
 
 
 </div>
@@ -353,11 +310,11 @@
     string Message = "Не са избрани файлове.";
     private HashSet<Image> mediaList = new HashSet<Image>();
     //private HashSet<Gallery> galeryList = new HashSet<Gallery>();
-    private HashSet<GalleryImage> giList = new HashSet<GalleryImage>();
-        private GalleryImage gi = new GalleryImage();
-    private HashSet<Gallery> galeryList = new HashSet<Gallery>();
+    private HashSet<Category> cList = new HashSet<Category>();
+        private CategoryProject cp = new CategoryProject();
+    private HashSet<CategoryProject> cpList = new HashSet<CategoryProject>();
 
-    private HashSet<GalleryImage> giToAdd = new HashSet<GalleryImage>();
+    private Category cModel = new Category();
 
     IReadOnlyList<IBrowserFile> selectedFiles;
 
@@ -369,43 +326,28 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        galeryList = this.db.Galleries.ToHashSet();
-        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
-        mediaList = this.imageService.GetImages().ToHashSet();
+        cList = this.db.Category.ToHashSet();
+        cpList = this.db.CategoryProjects.Include(c => c.Category).Include(p => p.Project).ToHashSet();
+        
 
         StateHasChanged();
     }
 
-    void CheckboxClicked(Image image, object checkedValue)
-    {
-        if ((bool)checkedValue)
-        {
-
-            giToAdd.Add(new GalleryImage() { GalleryId = galeryModel.Id, ImageId = image.Id });
-        }
-        else
-        {
-
-        }
-    }
+    
 
     async void HandleValidSubmit(EditContext editContext)
     {
-        this.galeryModel.GalleryImages = giToAdd;
-        this.db.Galleries.Add(galeryModel);
+        this.db.Category.Add(cModel);
         this.db.SaveChanges();
-
-        giToAdd = new HashSet<GalleryImage>();
-        galeryModel = new Gallery();
         StateHasChanged();
     }
 
 
-    async void HandleValidSubmitAddMedia(EditContext editContext)
+    async void HandleValidSubmitCP(EditContext editContext)
     {
         
         
-        this.db.GalleryImages.Add(gi);
+        this.db.CategoryProjects.Add(cp);
         this.db.SaveChanges();
         
         
@@ -414,28 +356,20 @@
 
     void DeleteItem(string id)
     {
-        HashSet<GalleryImage> giToDelete = this.db.GalleryImages.Where(gi => gi.GalleryId == id).ToHashSet();
-        this.db.GalleryImages.RemoveRange(giToDelete);
+        this.db.Category.FirstOrDefault(x => x.Id == id);
         this.db.SaveChanges();
-        Gallery galeryToDelete = this.db.Galleries.FirstOrDefault(g => g.Id == id);
-        this.db.Galleries.Remove(galeryToDelete);
-        this.db.SaveChanges();
-
-        galeryList = this.db.Galleries.ToHashSet();
-        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
         StateHasChanged();
     }
 
-    void DeleteGI(string galeryId, string ImageId)
+    void DeleteCP(string catId, string projId)
     {
-        GalleryImage giToDelete = this.db.GalleryImages.FirstOrDefault(gi => gi.GalleryId == galeryId || gi.ImageId == ImageId);
-        this.db.GalleryImages.Remove(giToDelete);
+        CategoryProject catProj = this.db.CategoryProjects.First(x => x.CategoryId == catId && x.ProjectId == projId);
+        this.db.CategoryProjects.Remove(catProj);
         this.db.SaveChanges();
 
 
 
-
-        giList = this.db.GalleryImages.Include(i => i.Image).Include(g => g.Gallery).ToHashSet();
+        
         StateHasChanged();
     }
 

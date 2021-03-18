@@ -36,7 +36,7 @@
                         <table class="table table-hover text-nowrap">
                             <thead>
                                 <tr>
-
+                                    <th>Id</th>
                                     <th>Title</th>
                                     <th>Image</th>
                                     <th>Action</th>
@@ -47,7 +47,9 @@
                                 @foreach (var item in @mediaList)
                                 {
                                     <tr>
-
+                                        <td>
+                                            @item.Id
+                                        </td>
                                         <td>
                                             @item.Title
                                         </td>
@@ -94,6 +96,8 @@
                     <div class="card-body">
                         <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави
                             Медиа</button>
+                            <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalAddMedia())">Добави
+                            Медиа без качване</button>
                     </div>
 
 
@@ -150,7 +154,7 @@
 
                         <form @onsubmit="OnSubmit">
                             <InputFile class="btn btn-block btn-secondary" OnChange="OnInputFileChange" multiple
-                                maxAllowedSize="1000000" />
+                                maxAllowedSize="5000000000" />
                             <br /><br />
                             <button class="btn btn-primary" type="submit">Качи на сървъра</button>
                         </form>
@@ -170,6 +174,53 @@
         <!-- /.modal -->
     }
 
+    @if (showModalAddMedia)
+    {
+        <div class="modal" tabindex="-1" ig="modal-ld" style="display:block" role="dialog">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Добави медиа</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Избери медиа.&hellip;</p>
+
+                        <EditForm id="@pageId" Model="@mediaModel" OnSubmit="@HandleValidSubmitAddMedia">
+                        <ChildContent Context="another_name">
+                            <DataAnnotationsValidator />
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="mediaModel.Title">Заглавие</label>
+                                    <InputText class="form-control" @bind-Value="mediaModel.Title" />
+                                </div>
+                                
+                                
+                                
+                                <button type="submit" class="btn btn-success">Запази</button>
+                                
+
+                                
+                            </div>
+                            <!-- /.card-body -->
+                        </ChildContent>
+                    </EditForm>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            @onclick="() => CloseModalAddMedia()">Затвори</button>
+
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!-- /.modal -->
+    }
+
 
 </div>
 
@@ -179,6 +230,8 @@
 {
     string pageId = "abv";
     bool showModal = false;
+    bool showModalAddMedia = false;
+
     string Message = "Не са избрани файлове.";
     private HashSet<Image> mediaList = new HashSet<Image>();
     IReadOnlyList<IBrowserFile> selectedFiles;
@@ -201,6 +254,14 @@
     {
         imageService.AddImage(mediaModel);
 
+        mediaModel = new Image();
+        StateHasChanged();
+    }
+    async void HandleValidSubmitAddMedia(EditContext editContext)
+    {
+        
+        mediaModel.Url = "/Uploads/" + mediaModel.Title;
+        imageService.AddImage(mediaModel);
         mediaModel = new Image();
         StateHasChanged();
     }
@@ -237,7 +298,7 @@
         foreach (var file in selectedFiles)
         {
             string giud = Guid.NewGuid().ToString();
-            Stream stream = file.OpenReadStream(10000000);
+            Stream stream = file.OpenReadStream(5000000000);
             var filePath = "/Uploads/" + giud + file.Name;
             var cwrf = env.WebRootPath;
             var path = Path.Combine(cwrf, "Uploads", giud + file.Name);
@@ -279,6 +340,17 @@
     void CloseModal()
     {
         showModal = false;
+        StateHasChanged();
+    }
+    void OpenModalAddMedia()
+    {
+        showModalAddMedia = true;
+        StateHasChanged();
+    }
+
+    void CloseModalAddMedia()
+    {
+        showModalAddMedia = false;
         StateHasChanged();
     }
 

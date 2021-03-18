@@ -9,5 +9,9 @@
 @using INStudio
 @using INStudio.Shared
 @using INStudio.Services
+@using INStudio.Data
 @inject INStudio.Services.ISettingsService settingsService
+@inject INStudio.Services.IPartniorsService partniorService
 @inject NavigationManager navigationManager
+@inject ApplicationDbContext db
+@using Microsoft.EntityFrameworkCore

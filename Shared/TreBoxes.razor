@@ -5,19 +5,19 @@
             <div class="col-md-3">
                 <div id="text_hover" class="const text_align_center">
                     <i><img src="images/ser2.png" alt="#" /></i>
-                    <span>Проектиране</span>
+                    <span>@boxOneText</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div id="text_hover" class="const text_align_center">
                     <i><img src="images/ser1.png" alt="#" /></i>
-                    <span>Строителство</span>
+                    <span>@boxTwoText</span>
                 </div>
             </div>
             <div class="col-md-3">
-                <div id="text_hover" class="const text_align_center">
+                <div id="text_hover" class="const text_align_center" @onclick="() => GoTo(boxTreLink)">
                     <i><img src="images/ser3.png" alt="#" /></i>
-                    <span>Поддръжка</span>
+                    <a href="@boxTreLink" target="_self"><span>@boxTreeText</span></a>
                 </div>
             </div>
         </div>
@@ -27,4 +27,36 @@
 
 @code {
 
+    private HashSet<Setting> settingsList;
+    private string boxOneText;
+    private string boxOneLink;
+    private string boxTwoText;
+    private string boxTwoLink;
+    private string boxTreeText;
+    private string boxTreLink;
+
+
+    protected override void OnInitialized()
+        {
+            base.OnInitialized();
+
+            settingsList = this.db.Settings.ToHashSet();
+            this.boxOneText = this.settingsList.FirstOrDefault(s => s.Key == "SqareOne").Value;
+            this.boxOneLink = this.settingsList.FirstOrDefault(s => s.Key == "SqareOneLink").Value;
+            this.boxTwoText = this.settingsList.FirstOrDefault(s => s.Key == "SqareTwo").Value;
+            this.boxTwoLink = this.settingsList.FirstOrDefault(s => s.Key == "SqareTwoLink").Value;
+            this.boxTreeText = this.settingsList.FirstOrDefault(s => s.Key == "SqareTree").Value;
+            this.boxTreLink = this.settingsList.FirstOrDefault(s => s.Key == "SqareTreeLink").Value;
+
+
+        }
+
+
+        protected void GoTo(string link)
+        {
+            this.navigationManager.NavigateTo(link, true);
+        }
+    
+
 }
+    

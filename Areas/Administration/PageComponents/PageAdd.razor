@@ -45,7 +45,7 @@
                                 <button type="submit" class="btn btn-success">Запази</button>
                                 <form @onsubmit="OnSubmit">
                                     <InputFile class="btn btn-block btn-secondary" OnChange="OnInputFileChange" multiple
-                                        maxAllowedSize="1000000" />
+                                        maxAllowedSize="5000000000" />
                                     <br /><br />
                                     <button class="btn btn-primary" type="submit">Качи на сървъра</button>
                                 </form>
@@ -228,7 +228,7 @@
         foreach (var file in selectedFiles)
         {
             string giud = Guid.NewGuid().ToString();
-            Stream stream = file.OpenReadStream(10000000);
+            Stream stream = file.OpenReadStream(5000000000);
             var filePath = "/Uploads/" + giud + file.Name;
             var cwrf = env.WebRootPath;
             var path = Path.Combine(cwrf, "Uploads", giud + file.Name);

@@ -1,9 +1,9 @@
-@page "/Administration/Project/AddProject"
-@page "/Administration/Project/Edit/{id}"
+@page "/Administration/Partniors/AddPartnior"
+@page "/Administration/Partniors/Edit/{id}"
 @inject ApplicationDbContext db
 @inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment env
 @using Microsoft.EntityFrameworkCore
-@inject IProjectService projectService
+@inject IPartniorsService partniorService
 @inject IImageService imageService
 @using Blazored.Toast
 @using Blazored.Toast.Services
@@ -20,37 +20,27 @@
                 <!-- general form elements -->
                 <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Добави Проект</h3>
+                        <h3 class="card-title">Добави Партньор</h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <EditForm id="@pageId" Model="@projectModel" OnSubmit="@HandleValidSubmit">
+                    <EditForm id="@pageId" Model="@partniorModel" OnSubmit="@HandleValidSubmit">
                         <ChildContent Context="another_name">
                             <DataAnnotationsValidator />
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label for="projectModel.Title">Заглавие</label>
-                                    <InputText class="form-control" @bind-Value="projectModel.Title" />
+                                    <label for="partniorModel.Title">Име</label>
+                                    <InputText class="form-control" @bind-Value="partniorModel.Title" />
                                 </div>
                                 <div class="form-group">
-                                    <label for="projectModel.Description">Текст</label>
-                                    <InputText class="form-control" @bind-Value="projectModel.Description" />
+                                    <label for="partniorModel.Description">Текст</label>
+                                    <InputText class="form-control" @bind-Value="partniorModel.Description" />
                                 </div>
                                 <div class="form-group">
-                                        <label for="galeryModel.Title">Категории</label>
-                                        @foreach (var cat in categories)
-                                        {
-                                            <input type="checkbox" class="form-control" @onchange="eventArgs => { CheckboxClickedCat(cat.Id, eventArgs.Value); }"/>@cat.Title
-                                        }
-                                    </div>
-                                    <hr>
-                                        
-                                        <ul>
-                                            @foreach (var item in cpForModel)
-                                            {
-                                                <li>@item.Category.Title</li>
-                                            } 
-                                        </ul>
+                                    <label for="partniorModel.Description">Линк</label>
+                                    <InputText class="form-control" @bind-Value="partniorModel.Link" />
+                                </div>
+                                
                                 
                                 <div class="form-group">
                                     <button type="button" class="btn btn-primary" @onclick="@(() => OpenModalPrimaryImage())">Добави Основна снимка</button>
@@ -118,15 +108,10 @@
                                 <DataAnnotationsValidator />
                                 <div class="card-body">
                                     <div class="form-group">
-                                        <label for="galeryModel.Title">Title</label>
+                                        <label for="galeryModel.Title">Заглавие на Галерията</label>
                                         <InputText class="form-control" @bind-Value="galeryModel.Name" />
                                     </div>
                                     
-                                    <div class="form-group">
-
-                                        <span>Добавени Категории</span>
-                                        
-                                    </div>
                                     <div class="form-group">
 
                                         <button type="button" class="btn btn-primary" @onclick="@(() => OpenModal())">Добави Медии</button>
@@ -206,13 +191,13 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Добави медиа</h4>
+                        <h4 class="modal-title">Добави Лого</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>Избери медиа.&hellip;</p>
+                        <p>Избери лого.&hellip;</p>
 
                         <div id="scrollable-content">
                             <ul class="ulcustompopup">
@@ -230,7 +215,7 @@
                     <div class="modal-footer justify-content-between">
                         <form @onsubmit="OnSubmit">
                                     <InputFile class="btn btn-secondary" OnChange="OnInputFileChange" multiple
-                                        maxAllowedSize="5000000000" />
+                                        maxAllowedSize="1000000" />
                                     <br /><br />
                                     <button class="btn btn-primary" type="submit">Качи на сървъра</button>
                                 </form>
@@ -267,7 +252,7 @@
     [Parameter]
     public string Id { get; set; }
 
-    Project projectModel;
+    Partnior partniorModel;
 
     string pageId = "abv";
     string modalId = "4451";
@@ -280,9 +265,6 @@
     private Gallery galeryModel = new Gallery();
     private HashSet<GalleryImage> giToAdd = new HashSet<GalleryImage>();
 
-        private HashSet<Category> categories;
-        private HashSet<CategoryProject> cpForModel;
-
 
     void GetAllMedias()
     {
@@ -293,16 +275,13 @@
         base.OnInitialized();
 
         GetAllMedias();
-        this.categories = this.db.Category.ToHashSet();
         if (Id != null)
         {
-            this.projectModel = this.projectService.GetProject(Id);
-            cpForModel = this.db.CategoryProjects.Where(x => x.ProjectId == Id).Include(c => c.Category).ToHashSet();
+            this.partniorModel = this.partniorService.GetPartnior(Id);
         }
         else
         {
-            projectModel = new Project();
-            cpForModel = new HashSet<CategoryProject>();
+            partniorModel = new Partnior();
         }
 
 
@@ -319,11 +298,11 @@
 
         if(Id != null)
         {
-            operationOk = this.projectService.EditProject(Id, projectModel);
+            operationOk = this.partniorService.EditPartnior(Id, partniorModel);
         }
         else
         {
-            operationOk = this.projectService.AddProject(projectModel);
+            operationOk = this.partniorService.AddPartnior(partniorModel);
             
         }
 
@@ -336,15 +315,15 @@
             toastService.ShowToast(ToastLevel.Error, "Има грешка при ракцията!");
         }
 
-        navigationManager.NavigateTo("/Administration/Project/All");
+        navigationManager.NavigateTo("/Administration/Partniors/All");
         
     }
 
     void AddGaleryToProject(EditContext editContext)
     {
-        projectModel.Gallery = galeryModel;
-        projectModel.GalleryId = galeryModel.Id;
-        projectModel.Gallery.GalleryImages = giToAdd;
+        partniorModel.Galery = galeryModel;
+        partniorModel.GeleryId = galeryModel.Id;
+        partniorModel.Galery.GalleryImages = giToAdd;
 
 
 
@@ -366,7 +345,7 @@
         foreach (var file in selectedFiles)
         {
             string giud = Guid.NewGuid().ToString();
-            Stream stream = file.OpenReadStream(5000000000);
+            Stream stream = file.OpenReadStream(10000000);
             var filePath = "/Uploads/" + giud + file.Name;
             var cwrf = env.WebRootPath;
             var path = Path.Combine(cwrf, "Uploads", giud + file.Name);
@@ -379,7 +358,7 @@
             img.Title = file.Name;
             img.Url = filePath;
             imageService.AddImage(img);
-            projectModel.Image = img;
+            partniorModel.Image = img;
         }
         Message = $"{selectedFiles.Count} файлове качени на сървъра.";
         GetAllMedias();
@@ -403,7 +382,7 @@
          if ((bool)checkedValue)
         {
 
-            projectModel.ImageId = image.Id;
+            partniorModel.ImageId = image.Id;
         }
         else
         {
@@ -451,28 +430,6 @@
         string path = this.mediaList.FirstOrDefault(x => x.Id == id).Url;
 
         return path;
-    }
-
-    void CheckboxClickedCat(string catId, object checkedValue)
-    {
-        CategoryProject cp = new CategoryProject(){CategoryId = catId, ProjectId = projectModel.Id};
-        if ((bool)checkedValue)
-        {
-            if (!cpForModel.Contains(cp))
-            {
-                this.db.CategoryProjects.Add(cp);
-                this.db.SaveChanges();
-                cpForModel = this.db.CategoryProjects.Where(x => x.ProjectId == Id).Include(c => c.Category).ToHashSet();
-            }
-        }
-        else
-        {
-            if (cpForModel.Contains(cp))
-            {
-                this.db.CategoryProjects.Remove(cp);
-                cpForModel = this.db.CategoryProjects.Where(x => x.ProjectId == Id).Include(c => c.Category).ToHashSet();
-            }
-        }
     }
 
 
