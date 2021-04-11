@@ -1,7 +1,31 @@
 ﻿@page "/AboutAs"
 @inject IPageService pageService
+@inject IImageService imageService
 @layout INStudio.Pages.InnerSiteLayout
 @using System.Web
+
+<style>
+    div.gallery {
+        margin: 5px;
+        border: 1px solid #ccc;
+        float: left;
+        width: 180px;
+    }
+
+    div.gallery:hover {
+        border: 1px solid #777;
+    }
+
+    div.gallery img {
+        width: 100%;
+        height: auto;
+    }
+
+    div.desc {
+        padding: 15px;
+        text-align: center;
+    }
+</style>
 
 <div class="back_re">
     <div class="container">
@@ -31,20 +55,113 @@
                 </div>
             </div>
         </div>
+
+        <div class="row d_flex">
+
+    @if(AboutPage.Gallery != null)
+    {
+        @if (AboutPage.Gallery.GalleryImages.Count > 0)
+        {
+        <div class="container">
+
+            <h1 class="font-weight-light text-center text-lg-left mt-4 mb-0">Снимки</h1>
+            <hr class="mt-2 mb-5">
+            <div class="row text-center text-lg-left">
+
+            @foreach (Image image in SavedImages.Where(x => !x.Url.EndsWith(".mp4")))
+            {
+                <div class="col-lg-3 col-md-4 col-6">
+                    <img src="@image.Url" onclick="openModal();currentSlide(1)" class="hover-shadow img-thumbnail">
+                </div>
+
+            }
+                    </div>
+        </div>
+        }
+    }
+
+
+</div>
+
+<!-- The Modal/Lightbox -->
+<div id="myModal" class="modal">
+  <span class="close cursor" onclick="closeModal()">&times;</span>
+  <div class="modal-content">
+
+    @if(AboutPage.Gallery != null)
+    {
+        @if (AboutPage.Gallery.GalleryImages.Count > 0)
+    {
+        @foreach (Image image in SavedImages.Where(x => !x.Url.EndsWith(".mp4")))
+        {
+            <div class="mySlides">
+            <div class="numbertext"></div>
+                <img src="@image.Url" style="width:100%; max-width:80%">
+            </div>
+            
+            
+        }
+    }
+    }
+
+    <!-- Next/previous controls -->
+    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+
+    <!-- Caption text -->
+    <div class="caption-container">
+      <p id="caption"></p>
+    </div>
+
+    @* <!-- Thumbnail image controls -->
+    @if (projectModel.Gallery.GalleryImages.Count > 0)
+    {
+        @foreach (Image image in SavedImages.Where(x => !x.Url.EndsWith(".mp4")))
+        {
+            <div class="column">
+                <img class="demo" src="@image.Url" onclick="currentSlide(1)" alt="Nature">
+            </div>
+            
+        }
+    } *@
+    
+
+    
+  </div>
+</div>
+
+
+
+
+
+
     </div>
 </div>
 <!-- end about -->
 
 @code {
 
-
+    private HashSet<Image> SavedImages;
     public INStudio.Data.Page AboutPage { get; set; }
+
+    private HashSet<Image> GetImages(HashSet<GalleryImage> galleryImages)
+    {
+        return this.imageService.GetImagesByGaleryImage(galleryImages);
+
+    }
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
         this.AboutPage = pageService.GetPageByName("За Нас");
+        if (AboutPage.Gallery != null)
+        {
+            if (AboutPage.Gallery.GalleryImages != null)
+            {
+                this.SavedImages = GetImages(AboutPage.Gallery.GalleryImages.ToHashSet());
+            }
+        }
 
     }
 

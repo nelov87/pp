@@ -27,7 +27,7 @@ namespace INStudio.Services
 
                 this.db.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message + " --- PageService Add");
                 operatinOk = false;
@@ -43,10 +43,10 @@ namespace INStudio.Services
             try
             {
                 Page pageToRemove = this.db.Pages.FirstOrDefault(x => x.Id == id);
-            this.db.Remove(pageToRemove);
-            this.db.SaveChanges();
+                this.db.Remove(pageToRemove);
+                this.db.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message + " --- PageService Delete");
                 operatinOk = false;
@@ -61,27 +61,54 @@ namespace INStudio.Services
             try
             {
                 Page pageToEdit = this.db.Pages.FirstOrDefault(x => x.Id == id);
-            pageToEdit = page;
+                pageToEdit = page;
 
-            this.db.SaveChanges();
+                this.db.SaveChanges();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message + " --- PageService Edit");
                 operatinOk = false;
             }
             return operatinOk;
         }
+        public bool DeleteGalleryFromPageModel(string pageId)
+        {
+            bool operationOk = false;
+
+            try
+            {
+                Page page = this.db.Pages.First(x => x.Id == pageId);
+
+                HashSet<GalleryImage> giToDelete = this.db.GalleryImages.Where(gi => gi.GalleryId == page.GalleryId).ToHashSet();
+                this.db.GalleryImages.RemoveRange(giToDelete);
+                this.db.SaveChanges();
+
+                Gallery galeryToDelete = this.db.Galleries.FirstOrDefault(g => g.Id == page.GalleryId);
+                this.db.Galleries.Remove(galeryToDelete);
+                this.db.SaveChanges();
+
+                operationOk = true;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message + " --- PageService DeleteGalleryFromPageModel");
+                operationOk = false;
+            }
+
+            return operationOk;
+        }
+
 
         public Page GetPageById(string id)
         {
-            Page page = this.db.Pages.Include(p => p.Image).FirstOrDefault(x => x.Id == id);
+            Page page = this.db.Pages.Include(p => p.Image).Include(g => g.Gallery).Include(gi => gi.Gallery.GalleryImages).FirstOrDefault(x => x.Id == id);
 
             return page;
         }
         public Page GetPageByName(string name)
         {
-            Page page = this.db.Pages.Include(p => p.Image).FirstOrDefault(x => x.Title == name);
+            Page page = this.db.Pages.Include(p => p.Image).Include(g => g.Gallery).Include(gi => gi.Gallery.GalleryImages).FirstOrDefault(x => x.Title == name);
 
             return page;
         }
@@ -100,7 +127,7 @@ namespace INStudio.Services
             if (id != null)
             {
                 isItExist = this.db.Pages.Any(p => p.Id == id);
-                
+
             }
             return isItExist;
         }

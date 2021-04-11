@@ -13,8 +13,10 @@ namespace INStudio.Data
 
         public string Content { get; set; }
 
+        public string ImageId { get; set; }
         public Image Image { get; set; }
 
+        public string GalleryId { get; set; }
         public Gallery Gallery { get; set; }
 
         public Page()

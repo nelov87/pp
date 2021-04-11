@@ -23,5 +23,7 @@ namespace INStudio.Services
 
         bool IsPageExist(string id);
 
+        bool DeleteGalleryFromPageModel(string pageId);
+
     }
 }
